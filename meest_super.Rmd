@@ -1,0 +1,84 @@
+---
+title: "Exploring the use of syntactic superlatives on Twitter"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+## Data
+
+Counts for *'de/het meest \*e'* (syntactic superlative) and *'de/het \*ste'* (morphological superlative) per month for 2013-2020 Dutch twitter data. 
+
+For the morphological data, we filtered occurrences of *'eerste, laatste, meeste, juiste, beste'* as these are very frequent (approx. 60% of the cases) while the syntactic alternative does not really exist. 
+
+Note that we did not filter retweets, this might have some effect especially for counts of specific word forms. 
+
+Loading the raw counts: 
+
+```{r}
+library(dplyr)
+setwd("C:/Users/gosse/haytabo/CorpusLinguistics")
+meest <- read.csv("meest_super.csv", sep=' ')
+meestt <- tibble(meest) 
+meestt
+
+```
+
+## Adding some rows
+
+Adding rows for total and ratio of meest/super and percentage of *meest* in total
+
+```{r}
+
+meestt2 <- mutate(meestt, total = meest + super, ratio = meest/super, percentage = meest/total)
+meestt2
+       
+```
+## Plotting the trend
+
+```{r}
+library(ggplot2)
+
+ggplot(data = meestt2, aes(x=as.Date(Month), y = ratio)) + geom_col() + geom_smooth(method = "lm") +
+    coord_cartesian(ylim = c(0.0,0.2)) + xlab('Month') + ggtitle("Ratio of syntactic over synthetic superlatives")
+
+
+ggplot(data = meestt2, aes(x=as.Date(Month), y = percentage)) + geom_col() + geom_smooth(method = "lm") +
+    coord_cartesian(ylim = c(0.0,0.2)) + xlab('Month') + ggtitle("Percentage of syntactic superlatives")
+
+```
+
+
+## Individual forms
+
+Does this trend also hold when we check for individual forms. Here we try *'meest populaire'* vs *'populairste'*. 
+
+It seems the trend is in the same direction, but the data is quite a bit more noisy, due to lower total numbers. 
+
+```{r}
+populair <- read.csv("meest_populaire.csv", sep=' ')
+populairr <- tibble(populair) 
+populairr2 <- mutate(populairr, total = meest + super, ratio = meest/super, percentage = meest/total)
+populairr2
+
+ggplot(data = populairr2, aes(x=as.Date(Month), y = ratio)) + geom_col() + geom_smooth(method = "lm") +
+    xlab('Month') + ggtitle("Ratio of syntactic over synthetic superlatives")
+```
+
+## Prefix aller-
+
+The prefix *aller-* is quite popular in the superlative as well (*allerliefste*). Does it increase in popularity as well? Here we compare counts for *aller-* prefixed superlatives with all superlatives.
+
+The trend is downward. (Quick hypothesis: as Twitter is being used more and more for professional communication, informal language decreases as well. We see this with other phenomena as well, such as frequency of spelling errors. )
+
+```{r}
+aller <- read.csv("aller.csv", sep=' ')
+allerr <- tibble(aller) 
+allerr2 <- mutate(allerr,  percentage = aller/super)
+allerr2
+
+ggplot(data = allerr2, aes(x=as.Date(Month), y = percentage)) + geom_col() + geom_smooth(method = "lm") +
+    xlab('Month') + ggtitle("Percentage of aller- in synthetic superlatives")
+```
+```
+
